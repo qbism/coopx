@@ -1047,6 +1047,12 @@ static qsocket_t UDP_OpenSocket(const char *iface, int port, int family)
                             __func__, iface, port, NET_ErrorString());
             }
 
+            // make it reusable
+            if (os_setsockopt(s, SOL_SOCKET, SO_REUSEADDR, 1)) {
+                Com_WPrintf("%s: %s:%d: can't make socket reusable: %s\n",
+                            __func__, iface, port, NET_ErrorString());
+            }
+
 #ifdef IP_RECVERR
             // enable ICMP error queue
             if (os_setsockopt(s, IPPROTO_IP, IP_RECVERR, 1)) {
