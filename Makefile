@@ -43,14 +43,30 @@ RCFLAGS_g :=
 
 LDFLAGS_s :=
 LDFLAGS_c :=
-LDFLAGS_g := -shared
+LDFLAGS_g := -shared -static-libstdc++ -static-libgcc
 
 ifdef CONFIG_WINDOWS
     # Force i?86-netware calling convention on x86 Windows
     ifeq ($(CPU),x86)
         CONFIG_X86_GAME_ABI_HACK := y
+
+        CFLAGS_s += -m32
+        CFLAGS_c += -m32
+        CFLAGS_g += -m32
+
+        LDFLAGS_s += -m32
+        LDFLAGS_c += -m32
+        LDFLAGS_g += -m32
     else
         CONFIG_X86_GAME_ABI_HACK :=
+
+        CFLAGS_s += -m64
+        CFLAGS_c += -m64
+        CFLAGS_g += -m64
+
+        LDFLAGS_s += -m64
+        LDFLAGS_c += -m64
+        LDFLAGS_g += -m64
     endif
 
     LDFLAGS_s += -mconsole
