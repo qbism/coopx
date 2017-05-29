@@ -936,9 +936,11 @@ static void CL_AddViewWeapon(void)
         return;
     }
 
+#if 0
     if (info_hand->integer == 2) {
         return;
     }
+#endif
 
     // find states to interpolate between
     ps = CL_KEYPS;
