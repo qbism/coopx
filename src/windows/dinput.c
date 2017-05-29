@@ -35,6 +35,10 @@ typedef HRESULT(WINAPI *LPDIRECTINPUTCREATE)(HINSTANCE, DWORD, LPDIRECTINPUT *, 
 
 static LPDIRECTINPUTCREATE pDirectInputCreate;
 
+typedef qboolean grab_t;
+
+#define IN_GRAB qtrue
+
 static grab_t           di_grabbed; // qfalse when not focus app
 static qboolean         di_initialized;
 static LPDIRECTINPUT    di;
