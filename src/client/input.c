@@ -507,6 +507,9 @@ static void CL_MouseMove(void)
     float *x, *y;
     float mx, my;
 
+    speed = sensitivity->value;
+    cx = speed, cy = speed;
+
     if (m_autosens->integer) {
         cx *= cl.fov_x * autosens_x;
         cy *= cl.fov_y * autosens_y;
@@ -526,9 +529,6 @@ static void CL_MouseMove(void)
         return;
 
     freelookp = !((in_strafe.state & 1) | (!!lookstrafe->integer & !in_mlooking));
-
-    speed = sensitivity->value;
-    cx = speed, cy = speed;
 
     if (q_likely(freelookp))
     {
