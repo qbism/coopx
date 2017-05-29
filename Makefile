@@ -630,6 +630,10 @@ DEPS_g := $(OBJS_g:.o=.d)
 -include $(DEPS_c)
 -include $(DEPS_g)
 
+build.stamp: .config Makefile
+	@rm -f ./build.stamp
+	@touch ./build.stamp
+
 clean:
 	$(E) [CLEAN]
 	$(Q)$(RM) $(TARG_s) $(TARG_c) $(TARG_g)
@@ -641,12 +645,12 @@ strip: $(TARG_s) $(TARG_c) $(TARG_g)
 
 # ------
 
-$(BUILD_s)/%.o: %.c
+$(BUILD_s)/%.o: %.c build.stamp
 	$(E) [CC] $@
 	$(Q)$(MKDIR) $(@D)
 	$(Q)$(CC) -c $(CFLAGS) $(CFLAGS_s) -o $@ $<
 
-$(BUILD_s)/%.o: %.rc
+$(BUILD_s)/%.o: %.rc build.stamp
 	$(E) [RC] $@
 	$(Q)$(MKDIR) $(@D)
 	$(Q)$(WINDRES) $(RCFLAGS) $(RCFLAGS_s) -o $@ $<
@@ -658,12 +662,12 @@ $(TARG_s): $(OBJS_s)
 
 # ------
 
-$(BUILD_c)/%.o: %.c
+$(BUILD_c)/%.o: %.c build.stamp
 	$(E) [CC] $@
 	$(Q)$(MKDIR) $(@D)
 	$(Q)$(CC) -c $(CFLAGS) $(CFLAGS_c) -o $@ $<
 
-$(BUILD_c)/%.o: %.rc
+$(BUILD_c)/%.o: %.rc build.stamp
 	$(E) [RC] $@
 	$(Q)$(MKDIR) $(@D)
 	$(Q)$(WINDRES) $(RCFLAGS) $(RCFLAGS_c) -o $@ $<
@@ -675,12 +679,12 @@ $(TARG_c): $(OBJS_c)
 
 # ------
 
-$(BUILD_g)/%.o: %.c
+$(BUILD_g)/%.o: %.c build.stamp
 	$(E) [CC] $@
 	$(Q)$(MKDIR) $(@D)
 	$(Q)$(CC) -c $(CFLAGS) $(CFLAGS_g) -o $@ $<
 
-$(BUILD_g)/%.o: %.rc
+$(BUILD_g)/%.o: %.rc build.stamp
 	$(E) [RC] $@
 	$(Q)$(MKDIR) $(@D)
 	$(Q)$(WINDRES) $(RCFLAGS) $(RCFLAGS_g) -o $@ $<
