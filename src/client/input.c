@@ -31,7 +31,7 @@ static cvar_t    *cl_instantpacket;
 static cvar_t    *cl_batchcmds;
 
 static cvar_t    *m_filter;
-static cvar_t    *m_accel;
+static cvar_t    *m_deadzone;
 static cvar_t    *m_autosens;
 
 static cvar_t    *cl_upspeed;
@@ -63,8 +63,6 @@ INPUT SUBSYSTEM
 typedef struct {
     qboolean    modified;
     inputAPI_t  api;
-    int         old_dx;
-    int         old_dy;
 } in_state_t;
 
 static in_state_t   input;
@@ -489,6 +487,13 @@ static float CL_KeyState(kbutton_t *key)
 static float autosens_x;
 static float autosens_y;
 
+#ifdef __GNUC__
+#   pragma GCC diagnostic push
+#   pragma GCC diagnostic error "-Wall"
+#   pragma GCC diagnostic error "-Wextra"
+#   pragma GCC diagnostic error "-Wpedantic"
+#endif
+
 /*
 ================
 CL_MouseMove
@@ -497,8 +502,15 @@ CL_MouseMove
 static void CL_MouseMove(void)
 {
     int dx, dy;
+    float speed, cx, cy, sgn_x, sgn_y;
+    qboolean freelookp;
+    float *x, *y;
     float mx, my;
-    float speed;
+
+    if (m_autosens->integer) {
+        cx *= cl.fov_x * autosens_x;
+        cy *= cl.fov_y * autosens_y;
+    }
 
     if (!input.api.GetMotion) {
         return;
@@ -510,48 +522,116 @@ static void CL_MouseMove(void)
         return;
     }
 
-    if (m_filter->integer) {
-        mx = (dx + input.old_dx) * 0.5f;
-        my = (dy + input.old_dy) * 0.5f;
-    } else {
-        mx = dx;
-        my = dy;
-    }
-
-    input.old_dx = dx;
-    input.old_dy = dy;
-
-    if (!mx && !my) {
+    if (dx == 0 && dy == 0)
         return;
+
+    freelookp = !((in_strafe.state & 1) | (!!lookstrafe->integer & !in_mlooking));
+
+    speed = sensitivity->value;
+    cx = speed, cy = speed;
+
+    if (q_likely(freelookp))
+    {
+        y = &cl.viewangles[PITCH];
+        x = &cl.viewangles[YAW];
+
+        cx *= m_yaw->value;
+        cy *= m_pitch->value;
+
+        sgn_x = -1, sgn_y = 1;
+
+        mx = dx * cx;
+        my = dy * cy;
+
+        Cvar_ClampValue(m_deadzone, 0, 5);
+        Cvar_ClampValue(m_filter, 0, 100);
+
+        if (m_filter->value > 1e-6f)
+        {
+            static int last_ms = 0;
+            int dt, ms = Sys_Milliseconds();
+            float alpha;
+            float const RC = m_filter->value; // ms
+            static float last_dx = 0, last_dy = 0;
+
+            dt = ms - last_ms;
+            last_ms = ms;
+
+            if (q_unlikely(dt == 0 || dt >= 250))
+            {
+                last_dx = 0, last_dy = 0;
+                mx = 0, my = 0;
+            }
+
+            alpha = dt/(dt + RC);
+
+            mx = mx*alpha;
+            my = my*alpha;
+
+            mx += last_dx * (1-alpha);
+            my += last_dy * (1-alpha);
+
+            last_dx = mx;
+            last_dy = my;
+
+#if 0
+            printf("1 dt:%d dy:%d my:%f cy:%f dz_y:%f last_y:%f y':%f\n", dt, dy, my, cy, dz_y, last_y, y_);
+#endif
+        }
+
+        if (m_deadzone->value > 1e-6)
+        {
+            static float dx_ = 0, dy_ = 0;
+            float dz_, dz_x = 0, dz_y = 0;
+
+            dz_ = m_deadzone->value;
+            dz_x = cx * dz_;
+            dz_y = cy * dz_;
+
+            if (fabsf(dx_) - 1e-4 > dz_x)
+            {
+                dx_ = 0;
+                mx = copysign(fmaxf(0, fabsf(mx) - dz_x), mx);
+            }
+            else
+            {
+                dx_ += mx;
+                mx = 0;
+            }
+
+            if (fabsf(dy_) - 1e-4 > dz_y)
+            {
+                dy_ = 0;
+                my = copysign(fmaxf(0, fabsf(my) - dz_y), my);
+            }
+            else
+            {
+                dy_ += my;
+                my = 0;
+            }
+        }
+    }
+    else
+    {
+        x = &cl.mousemove[1];
+        y = &cl.mousemove[0];
+
+        cx *= m_forward->value;
+        cy *= m_side->value;
+
+        sgn_x = 1, sgn_y = 1;
+
+        mx = dx * cx;
+        my = dy * cy;
     }
 
-    Cvar_ClampValue(m_accel, 0, 1);
-
-    speed = sqrt(mx * mx + my * my);
-    speed = sensitivity->value + speed * m_accel->value;
-
-    mx *= speed;
-    my *= speed;
-
-    if (m_autosens->integer) {
-        mx *= cl.fov_x * autosens_x;
-        my *= cl.fov_y * autosens_y;
-    }
-
-// add mouse X/Y movement
-    if ((in_strafe.state & 1) || (lookstrafe->integer && !in_mlooking)) {
-        cl.mousemove[1] += m_side->value * mx;
-    } else {
-        cl.viewangles[YAW] -= m_yaw->value * mx;
-    }
-
-    if ((in_mlooking || freelook->integer) && !(in_strafe.state & 1)) {
-        cl.viewangles[PITCH] += m_pitch->value * my;
-    } else {
-        cl.mousemove[0] -= m_forward->value * my;
-    }
+    *x += mx * sgn_x;
+    *y += my * sgn_y;
 }
 
+#ifdef __GNUC__
+#   pragma GCC diagnostic pop
+#endif
 
 /*
 ================
@@ -768,8 +848,8 @@ void CL_RegisterInput(void)
     m_yaw = Cvar_Get("m_yaw", "0.022", 0);
     m_forward = Cvar_Get("m_forward", "1", 0);
     m_side = Cvar_Get("m_side", "1", 0);
-    m_filter = Cvar_Get("m_filter", "0", 0);
-    m_accel = Cvar_Get("m_accel", "0", 0);
+    m_filter = Cvar_Get("m_filter_ms", "0.0", 0);
+    m_deadzone = Cvar_Get("m_deadzone", "0.0", 0);
     m_autosens = Cvar_Get("m_autosens", "0", 0);
     m_autosens->changed = m_autosens_changed;
     m_autosens_changed(m_autosens);
