@@ -28,7 +28,10 @@ RM ?= rm -f
 RMDIR ?= rm -rf
 MKDIR ?= mkdir -p
 
-CFLAGS ?= -O2 -Wall -g -MMD $(INCLUDES)
+WARNS ?= -Wall -Werror
+OPT ?= -O3 -g -ggdb -march=prescott
+
+CFLAGS ?= $(OPT) $(WARNS) -MMD $(INCLUDES)
 RCFLAGS ?=
 LDFLAGS ?=
 LIBS ?=
