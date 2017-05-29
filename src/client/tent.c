@@ -892,7 +892,8 @@ static void CL_RailTrail(void)
     if (!cl_railtrail_type->integer) {
         CL_OldRailTrail();
     } else {
-        CL_RailCore();
+        if (cl_railcore_width->integer)
+            CL_RailCore();
         if (cl_railtrail_type->integer > 1) {
             CL_RailSpiral();
         }
