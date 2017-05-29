@@ -172,7 +172,7 @@ static void R_Register(void)
     //End Added by Lewey
 
     r_speeds = Cvar_Get("r_speeds", "0", 0);
-    r_fullbright = Cvar_Get("r_fullbright", "0", CVAR_CHEAT);
+    r_fullbright = Cvar_Get("r_fullbright", "0", 0);
     r_drawentities = Cvar_Get("r_drawentities", "1", 0);
     r_drawworld = Cvar_Get("r_drawworld", "1", CVAR_CHEAT);
     r_lerpmodels = Cvar_Get("r_lerpmodels", "1", 0);
