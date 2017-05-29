@@ -58,6 +58,7 @@ typedef struct {
 } glmode_t;
 
 static const glmode_t filterModes[] = {
+    { "GL_MAG_NEAREST_MIN_TRILINEAR", GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST },
     { "GL_NEAREST", GL_NEAREST, GL_NEAREST },
     { "GL_LINEAR", GL_LINEAR, GL_LINEAR },
     { "GL_NEAREST_MIPMAP_NEAREST", GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST },
