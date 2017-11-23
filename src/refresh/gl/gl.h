@@ -66,6 +66,7 @@ typedef struct {
         vec_t       size;
     } world;
     GLuint          prognum_warp;
+    GLuint          prognum_lightmapped;
     GLuint          texnums[NUM_TEXNUMS];
     GLbitfield      stencil_buffer_bit;
     float           entity_modulate;

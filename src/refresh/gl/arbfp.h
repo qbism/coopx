@@ -15,3 +15,19 @@ static const char gl_prog_warp[] =
     "END\n"
 ;
 
+static const char gl_prog_lightmapped[] =
+    "!!ARBfp1.0\n"
+    "OPTION ARB_precision_hint_fastest;\n"
+
+    "TEMP diffuse, lightmap;\n"
+
+    "TEX diffuse, fragment.texcoord[0], texture[0], 2D;\n"
+    "TEX lightmap, fragment.texcoord[1], texture[1], 2D;\n"
+
+    "MUL lightmap, lightmap, program.local[0];\n"
+
+    "MUL diffuse, lightmap, diffuse;\n"
+    "MUL result.color, diffuse, fragment.color;\n"
+
+    "END\n"
+;

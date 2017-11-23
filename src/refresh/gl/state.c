@@ -146,6 +146,23 @@ void GL_StateBits(glStateBits_t bits)
     }
 
 #ifdef GL_ARB_fragment_program
+    if (diff & GLS_LIGHTMAP_ENABLE) {
+        if (bits & GLS_LIGHTMAP_ENABLE) {
+            vec4_t lightmap_scale;
+
+            qglEnable(GL_FRAGMENT_PROGRAM_ARB);
+            qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, gl_static.prognum_lightmapped);
+
+            lightmap_scale[0] = lightmap_scale[1] = lightmap_scale[2] = gl_modulate->value;
+            lightmap_scale[3] = 1.0f;
+
+            qglProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, lightmap_scale);
+        } else {
+            qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
+            qglDisable(GL_FRAGMENT_PROGRAM_ARB);
+        }
+    }
+
     if ((diff & GLS_WARP_ENABLE) && gl_static.prognum_warp) {
         if (bits & GLS_WARP_ENABLE) {
             vec4_t param;
@@ -461,11 +478,31 @@ void GL_DisableOutlines(void)
     qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
+static void GL_InitSingleProgram(GLenum target, const char *arb_shader_source, GLuint *out_target_program_id)
+{
+#ifdef GL_ARB_fragment_program
+    GLuint program_id = 0;
+
+    GL_ClearErrors();
+
+    qglGenProgramsARB(1, &program_id);
+    qglBindProgramARB(target, program_id);
+    qglProgramStringARB(target, GL_PROGRAM_FORMAT_ASCII_ARB, strlen(arb_shader_source), arb_shader_source);
+
+    if (GL_ShowErrors("Failed to initialize fragment program")) {
+        qglBindProgramARB(target, 0);
+        qglDeleteProgramsARB(1, &program_id);
+        return;
+    }
+
+    qglBindProgramARB(target, 0);
+    *out_target_program_id = program_id;
+#endif
+}
+
 void GL_InitPrograms(void)
 {
 #ifdef GL_ARB_fragment_program
-    GLuint prog = 0;
-
     if (gl_config.ext_supported & QGL_ARB_fragment_program) {
         if (gl_fragment_program->integer) {
             Com_Printf("...enabling GL_ARB_fragment_program\n");
@@ -484,21 +521,18 @@ void GL_InitPrograms(void)
         return;
     }
 
-    GL_ClearErrors();
+    GL_InitSingleProgram(GL_FRAGMENT_PROGRAM_ARB, gl_prog_warp, &gl_static.prognum_warp);
+    GL_InitSingleProgram(GL_FRAGMENT_PROGRAM_ARB, gl_prog_lightmapped, &gl_static.prognum_lightmapped);
+#endif
+}
 
-    qglGenProgramsARB(1, &prog);
-    qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, prog);
-    qglProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB,
-                        sizeof(gl_prog_warp) - 1, gl_prog_warp);
-
-    if (GL_ShowErrors("Failed to initialize fragment program")) {
-        qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
-        qglDeleteProgramsARB(1, &prog);
-        return;
+static void GL_ShutdownSingleProgram(GLuint *out_target_program_id)
+{
+#ifdef GL_ARB_fragment_program
+    if (*out_target_program_id) {
+        qglDeleteProgramsARB(1, out_target_program_id);
+        *out_target_program_id = 0;
     }
-
-    qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
-    gl_static.prognum_warp = prog;
 #endif
 }
 
@@ -509,10 +543,8 @@ void GL_ShutdownPrograms(void)
         return;
     }
 
-    if (gl_static.prognum_warp) {
-        qglDeleteProgramsARB(1, &gl_static.prognum_warp);
-        gl_static.prognum_warp = 0;
-    }
+    GL_ShutdownSingleProgram(&gl_static.prognum_warp);
+    GL_ShutdownSingleProgram(&gl_static.prognum_lightmapped);
 
     QGL_ShutdownExtensions(QGL_ARB_fragment_program);
     gl_config.ext_enabled &= ~QGL_ARB_fragment_program;

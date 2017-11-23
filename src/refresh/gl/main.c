@@ -695,7 +695,7 @@ static void gl_lightmap_changed(cvar_t *self)
     else
         lm.comp = lm.scale ? GL_RGB : GL_LUMINANCE;
     lm.add = 255 * Cvar_ClampValue(gl_brightness, -1, 1);
-    lm.modulate = gl_modulate->value * gl_modulate_world->value;
+    lm.modulate = 1.0f;
     lm.dirty = qtrue; // rebuild all lightmaps next frame
 }
 
