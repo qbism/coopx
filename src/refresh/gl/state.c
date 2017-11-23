@@ -146,7 +146,10 @@ void GL_StateBits(glStateBits_t bits)
     }
 
 #ifdef GL_ARB_fragment_program
-    if (diff & GLS_LIGHTMAP_ENABLE) {
+    qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
+    qglDisable(GL_FRAGMENT_PROGRAM_ARB);
+
+    if ((diff & GLS_LIGHTMAP_ENABLE) && gl_static.prognum_lightmapped) {
         if (bits & GLS_LIGHTMAP_ENABLE) {
             vec4_t lightmap_scale;
 
@@ -157,9 +160,6 @@ void GL_StateBits(glStateBits_t bits)
             lightmap_scale[3] = 1.0f;
 
             qglProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, lightmap_scale);
-        } else {
-            qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
-            qglDisable(GL_FRAGMENT_PROGRAM_ARB);
         }
     }
 
@@ -173,9 +173,6 @@ void GL_StateBits(glStateBits_t bits)
             param[1] = glr.fd.time;
             param[2] = param[3] = 0;
             qglProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, param);
-        } else {
-            qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
-            qglDisable(GL_FRAGMENT_PROGRAM_ARB);
         }
     }
 #endif
