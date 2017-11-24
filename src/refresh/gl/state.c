@@ -151,15 +151,25 @@ void GL_StateBits(glStateBits_t bits)
 
     if ((diff & GLS_LIGHTMAP_ENABLE) && gl_static.prognum_lightmapped) {
         if (bits & GLS_LIGHTMAP_ENABLE) {
-            vec4_t lightmap_scale;
+            vec4_t diffuse_scale, lightmap_scale, lightmap_brightness;
 
             qglEnable(GL_FRAGMENT_PROGRAM_ARB);
             qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, gl_static.prognum_lightmapped);
 
-            lightmap_scale[0] = lightmap_scale[1] = lightmap_scale[2] = gl_modulate->value;
+            diffuse_scale[0] = diffuse_scale[1] = diffuse_scale[2] = Cvar_ClampValue(gl_intensity, 1.0f, 4.0f);
+            diffuse_scale[3] = 1.0f;
+
+            qglProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, diffuse_scale);
+
+            lightmap_scale[0] = lightmap_scale[1] = lightmap_scale[2] = Cvar_ClampValue(gl_modulate, 1.0f, 4.0f) * Cvar_ClampValue(gl_modulate_world, 1.0f, 4.0);
             lightmap_scale[3] = 1.0f;
 
-            qglProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, lightmap_scale);
+            qglProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 1, lightmap_scale);
+
+            lightmap_brightness[0] = lightmap_brightness[1] = lightmap_brightness[2] = Cvar_ClampValue(gl_brightness, 0.0f, 1.0f);
+            lightmap_brightness[3] = 0.0f;
+
+            qglProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 2, lightmap_brightness);
         }
     }
 
@@ -173,6 +183,20 @@ void GL_StateBits(glStateBits_t bits)
             param[1] = glr.fd.time;
             param[2] = param[3] = 0;
             qglProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, param);
+        }
+    }
+
+    if ((diff & GLS_ALIAS_MESH) && gl_static.prognum_alias) {
+        if (bits & GLS_ALIAS_MESH) {
+            vec4_t diffuse_scale;
+
+            qglEnable(GL_FRAGMENT_PROGRAM_ARB);
+            qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, gl_static.prognum_alias);
+
+            diffuse_scale[0] = diffuse_scale[1] = diffuse_scale[2] = Cvar_ClampValue(gl_intensity, 1.0f, 4.0f);
+            diffuse_scale[3] = 1.0f;
+
+            qglProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, diffuse_scale);
         }
     }
 #endif
@@ -520,6 +544,7 @@ void GL_InitPrograms(void)
 
     GL_InitSingleProgram(GL_FRAGMENT_PROGRAM_ARB, gl_prog_warp, &gl_static.prognum_warp);
     GL_InitSingleProgram(GL_FRAGMENT_PROGRAM_ARB, gl_prog_lightmapped, &gl_static.prognum_lightmapped);
+    GL_InitSingleProgram(GL_FRAGMENT_PROGRAM_ARB, gl_prog_alias, &gl_static.prognum_alias);
 #endif
 }
 
@@ -542,6 +567,7 @@ void GL_ShutdownPrograms(void)
 
     GL_ShutdownSingleProgram(&gl_static.prognum_warp);
     GL_ShutdownSingleProgram(&gl_static.prognum_lightmapped);
+    GL_ShutdownSingleProgram(&gl_static.prognum_alias);
 
     QGL_ShutdownExtensions(QGL_ARB_fragment_program);
     gl_config.ext_enabled &= ~QGL_ARB_fragment_program;

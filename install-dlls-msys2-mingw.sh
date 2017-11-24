@@ -70,6 +70,8 @@ rm -Rf "$INSTALLDIR"
 mkdir -p "$INSTALLDIR/baseq2"
 mkdir -p "$INSTALLDIRLIBS"
 
+cp -v "./menu/q2pro.menu" "$INSTALLDIR/baseq2"
+
 for DLL in `ls ./*.dll`; do
     mv -v "$DLL" "$INSTALLDIR/baseq2"
 done
@@ -78,6 +80,7 @@ for EXE in `ls ./*.exe`; do
     EXE_BASENAME="`basename $EXE .exe`"
     mv -v "$EXE" "$INSTALLDIR/$EXE_BASENAME$SUFFIX.exe"
     cp -v "./launchers/$EXE_BASENAME$SUFFIX.cmd" "$INSTALLDIR"
+    cp -v "./launchers/$EXE_BASENAME-pre-configured$SUFFIX.cmd" "$INSTALLDIR"
 done
 
 for DEPENDENCY in `dependencies $INSTALLDIR/*.exe`; do
