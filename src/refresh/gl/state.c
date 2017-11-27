@@ -161,7 +161,7 @@ void GL_StateBits(glStateBits_t bits)
 
             qglProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, diffuse_scale);
 
-            lightmap_scale[0] = lightmap_scale[1] = lightmap_scale[2] = Cvar_ClampValue(gl_modulate, 1.0f, 4.0f) * Cvar_ClampValue(gl_modulate_world, 1.0f, 4.0);
+            lightmap_scale[0] = lightmap_scale[1] = lightmap_scale[2] = Cvar_ClampValue(gl_modulate, 1.0f, 4.0f) * Cvar_ClampValue(gl_modulate_world, 1.0f, 4.0f);
             lightmap_scale[3] = 1.0f;
 
             qglProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 1, lightmap_scale);
@@ -175,14 +175,15 @@ void GL_StateBits(glStateBits_t bits)
 
     if ((diff & GLS_WARP_ENABLE) && gl_static.prognum_warp) {
         if (bits & GLS_WARP_ENABLE) {
-            vec4_t param;
+            vec4_t warp_parameter, diffuse_scale;
 
             qglEnable(GL_FRAGMENT_PROGRAM_ARB);
             qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, gl_static.prognum_warp);
-            param[0] = glr.fd.time;
-            param[1] = glr.fd.time;
-            param[2] = param[3] = 0;
-            qglProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, param);
+
+            warp_parameter[0] = warp_parameter[1] = glr.fd.time;
+            warp_parameter[2] = warp_parameter[3] = 0;
+
+            qglProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, warp_parameter);
         }
     }
 
