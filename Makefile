@@ -28,7 +28,7 @@ RM ?= rm -f
 RMDIR ?= rm -rf
 MKDIR ?= mkdir -p
 
-CFLAGS ?= -O2 -Wall -g -MMD $(INCLUDES)
+CFLAGS ?= -Wall -g -MMD $(INCLUDES)
 RCFLAGS ?=
 LDFLAGS ?=
 LIBS ?=
@@ -269,11 +269,18 @@ OBJS_g := \
 ### Configuration Options ###
 
 ifdef CONFIG_HTTP
-    CURL_CFLAGS ?= $(shell pkg-config libcurl --cflags)
-    CURL_LIBS ?= $(shell pkg-config libcurl --libs)
+    CURL_CFLAGS ?= $(shell curl-config --cflags)
     CFLAGS_c += -DUSE_CURL=1 $(CURL_CFLAGS)
-    LIBS_c += $(CURL_LIBS)
     OBJS_c += src/client/http.o
+
+    ifndef CONFIG_STATIC
+        CURL_LIBS ?= $(shell curl-config --libs)
+        LIBS_c += $(CURL_LIBS)
+    else
+        CFLAGS_c += -DCURL_STATICLIB=1
+        CURL_LIBS ?= $(shell curl-config --static-libs)
+        LIBS_c += $(CURL_LIBS)
+    endif
 endif
 
 ifdef CONFIG_CLIENT_GTV
@@ -388,16 +395,27 @@ endif
 
 ifdef CONFIG_PNG
     PNG_CFLAGS ?= $(shell libpng-config --cflags)
-    PNG_LIBS ?= $(shell libpng-config --libs)
     CFLAGS_c += -DUSE_PNG=1 $(PNG_CFLAGS)
-    LIBS_c += $(PNG_LIBS)
+
+    ifndef CONFIG_STATIC
+        PNG_LIBS ?= $(shell libpng-config --libs)
+        LIBS_c += $(PNG_LIBS)
+    else
+        PNG_LIBS ?= $(shell libpng-config --libs --static)
+        LIBS_c += -Wl,-Bstatic $(PNG_LIBS) -Wl,-Bdynamic
+    endif
 endif
 
 ifdef CONFIG_JPEG
     JPG_CFLAGS ?=
     JPG_LIBS ?= -ljpeg
     CFLAGS_c += -DUSE_JPG=1 $(JPG_CFLAGS)
-    LIBS_c += $(JPG_LIBS)
+
+    ifndef CONFIG_STATIC
+        LIBS_c += $(JPG_LIBS)
+    else
+        LIBS_c += -Wl,-Bstatic $(JPG_LIBS) -Wl,-Bdynamic
+    endif
 endif
 
 ifdef CONFIG_ANTICHEAT_SERVER
@@ -587,8 +605,14 @@ ifdef CONFIG_TESTS
 endif
 
 ifdef CONFIG_DEBUG
+    CFLAGS += -Og
     CFLAGS_c += -D_DEBUG
     CFLAGS_s += -D_DEBUG
+else
+    CFLAGS += -Os
+    LDFLAGS_s += -s
+    LDFLAGS_c += -s
+    LDFLAGS_g += -s
 endif
 
 ifeq ($(CPU),x86)
