@@ -402,7 +402,7 @@ static void setup_color(void)
 
 static void setup_celshading(void)
 {
-    float value = Cvar_ClampValue(gl_celshading, 0, 10);
+    float value = Cvar_ClampValue(gl_celshading, 0, 20);
     vec3_t dir;
 
     celscale = 0;

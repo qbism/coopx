@@ -5,3 +5,9 @@
 q2pro
 q2proded
 game*.so
+q2pro.exe
+q2proded.exe
+game*.dll
+/baseq2
+/build.stamp
+/*

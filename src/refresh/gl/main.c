@@ -776,7 +776,7 @@ static void GL_Register(void)
     gl_novis->changed = gl_novis_changed;
     gl_lockpvs = Cvar_Get("gl_lockpvs", "0", CVAR_CHEAT);
     gl_lightmap = Cvar_Get("gl_lightmap", "0", CVAR_CHEAT);
-    gl_fullbright = Cvar_Get("r_fullbright", "0", CVAR_CHEAT);
+    gl_fullbright = Cvar_Get("r_fullbright", "0", 0);
     gl_fullbright->changed = gl_lightmap_changed;
     gl_vertexlight = Cvar_Get("gl_vertexlight", "0", 0);
     gl_vertexlight->changed = gl_lightmap_changed;
