@@ -175,7 +175,7 @@ void GL_StateBits(glStateBits_t bits)
 
     if ((diff & GLS_WARP_ENABLE) && gl_static.prognum_warp) {
         if (bits & GLS_WARP_ENABLE) {
-            vec4_t warp_parameter, diffuse_scale;
+            vec4_t warp_parameter;
 
             qglEnable(GL_FRAGMENT_PROGRAM_ARB);
             qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, gl_static.prognum_warp);

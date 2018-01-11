@@ -1,4 +1,4 @@
 ### q2pro Makefile ###
 
--include config
+-include config-linux-autodetect
 -include config-all

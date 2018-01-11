@@ -1,4 +1,4 @@
 ### q2pro Makefile ###
 
--include config
+-include config-win32-sw
 -include config-all
