@@ -72,7 +72,6 @@ CONFIG_NO_MD3=y
 # Disable TGA textures.
 #CONFIG_NO_TGA=y
 
-
 ### Server configuration ###
 
 # Enable r1ch.net anticheat server interface.
@@ -127,18 +126,6 @@ CONFIG_MVD_CLIENT=y
 #CONFIG_NO_SYSTEM_CONSOLE=y
 
 
-### Game directories ###
-
-# Name of the game directory used as base game directory. Default value is
-# "baseq2". Change this when creating a standalone game using Q2PRO engine.
-CONFIG_GAME_BASE=base
-
-# Name of the game directory used as default game directory. Default value is
-# empty. This option sets the default value of "game" console variable. Change
-# this for building a version of Q2PRO customized for particular game mod, e.g.
-# "action".
-#CONFIG_GAME_DEFAULT=
-
 
 ### System paths ###
 
@@ -167,8 +154,6 @@ CONFIG_GAME_BASE=base
 # This option sets the default value of "homedir" console variable. Default
 # value of this option is "" (use basedir as homedir).
 #CONFIG_PATH_HOME=~/.q2pro
-
-
 ### Options for cross-compiling. ###
 
 # Force cpu type to CPU, instead of autodetecting it.

@@ -86,6 +86,7 @@ cvar_t  *sw_waterwarp;
 cvar_t  *sw_dynamic;
 cvar_t  *sw_modulate;
 cvar_t  *sw_lockpvs;
+cvar_t  *sw_colorbits;
 
 //Start Added by Lewey
 // These flags allow you to turn SIRDS on and
@@ -134,6 +135,8 @@ int     sintable[CYCLE * 2];
 int     intsintable[CYCLE * 2];
 int     blanktable[CYCLE * 2];
 
+
+
 /*
 ================
 R_InitTurb
@@ -156,16 +159,17 @@ static void R_Register(void)
     sw_clearcolor = Cvar_Get("sw_clearcolor", "2", 0);
     sw_drawflat = Cvar_Get("sw_drawflat", "0", CVAR_CHEAT);
     sw_draworder = Cvar_Get("sw_draworder", "0", CVAR_CHEAT);
-    sw_maxedges = Cvar_Get("sw_maxedges", STRINGIFY(NUMSTACKEDGES), 0);
-    sw_maxsurfs = Cvar_Get("sw_maxsurfs", STRINGIFY(NUMSTACKSURFACES), 0);
+    sw_maxedges = Cvar_Get("sw_maxedges", STRINGIFY(MAXEDGES), 0);
+    sw_maxsurfs = Cvar_Get("sw_maxsurfs", STRINGIFY(MAXSURFACES), 0);
     sw_mipcap = Cvar_Get("sw_mipcap", "0", 0);
     sw_mipscale = Cvar_Get("sw_mipscale", "1", 0);
     sw_reportedgeout = Cvar_Get("sw_reportedgeout", "0", 0);
     sw_reportsurfout = Cvar_Get("sw_reportsurfout", "0", 0);
     sw_waterwarp = Cvar_Get("sw_waterwarp", "1", 0);
     sw_dynamic = Cvar_Get("sw_dynamic", "1", 0);
-    sw_modulate = Cvar_Get("sw_modulate", "1", 0);
+    sw_modulate = Cvar_Get("sw_modulate", "2.5", 0);
     sw_lockpvs = Cvar_Get("sw_lockpvs", "0", 0);
+    sw_colorbits = Cvar_Get("sw_colorbits", "16", 0); //qb:  1 to 24 range
 
     //Start Added by Lewey
     sw_drawsird = Cvar_Get("sw_drawsird", "0", 0);
@@ -862,6 +866,218 @@ void R_BeginFrame(void)
 
 void R_EndFrame(void)
 {
+    byte *src;
+    int x, y, row;
+
+        src = vid.buffer + vid.rowbytes * (vid.height - 1);
+
+    switch(sw_colorbits->integer)
+    {
+    case 0 ... 8: //3 3 2
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+        {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row] = (src[row]>>5)<<5;
+                src[row + 1] = (src[row + 1]>>5)<<5;
+                src[row + 2] = (src[row + 2]>>6)<<6;
+            }
+        }
+        break;
+
+    case 9: //3 3 3
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+        {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row] = (src[row]>>5)<<5;
+                src[row + 1] = (src[row + 1]>>5)<<5;
+                src[row + 2] = (src[row + 2]>>5)<<5;
+            }
+        }
+        break;
+
+    case 10: // 4 3 3
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+        {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row] = (src[row]>>4)<<4;
+                src[row + 1] = (src[row + 1]>>5)<<5;
+                src[row + 2] = (src[row + 2]>>5)<<5;
+            }
+        }
+        break;
+
+    case 11: // 4 4 3
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+        {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row] = (src[row]>>4)<<4;
+                src[row + 1] = (src[row + 1]>>4)<<4;
+                src[row + 2] = (src[row + 2]>>5)<<5;
+            }
+        }
+        break;
+
+    case 12: // 4 4 4
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+        {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row] = (src[row]>>4)<<4;
+                src[row + 1] = (src[row + 1]>>4)<<4;
+                src[row + 2] = (src[row + 2]>>4)<<4;
+            }
+        }
+        break;
+
+    case 13: // 5 4 4
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+        {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row] = (src[row]>>3)<<3;
+                src[row + 1] = (src[row + 1]>>4)<<4;
+                src[row + 2] = (src[row + 2]>>4)<<4;
+            }
+        }
+        break;
+
+    case 14: // 5 5 4
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+        {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row] = (src[row]>>3)<<3;
+                src[row + 1] = (src[row + 1]>>3)<<3;
+                src[row + 2] = (src[row + 2]>>4)<<4;
+            }
+        }
+        break;
+
+    case 15: //5 5 5
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+        {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row] = (src[row]>>3)<<3;
+                src[row + 1] = (src[row + 1]>>3)<<3;
+                src[row + 2] = (src[row + 2]>>3)<<3;
+            }
+        }
+        break;
+
+    case 16: //16-bit 6-5-5
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+        {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row] = (src[row]>>2)<<2;
+                src[row + 1] = (src[row + 1]>>3)<<3;
+                src[row + 2] = (src[row + 2]>>3)<<3;
+            }
+        }
+        break;
+
+    case 17: // 6 6 5
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+        {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row] = (src[row]>>2)<<2;
+                src[row + 1] = (src[row + 1]>>2)<<2;
+                src[row + 2] = (src[row + 2]>>3)<<3;
+    }
+        }
+        break;
+
+    case 18: //6 6 6
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+    {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row] = (src[row]>>2)<<2;
+                src[row + 1] = (src[row + 1]>>2)<<2;
+                src[row + 2] = (src[row + 2]>>2)<<2;
+            }
+        }
+        break;
+
+    case 19: // 7 6 6
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+        {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row] = (src[row]>>1)<<1;
+                src[row + 1] = (src[row + 1]>>2)<<2;
+                src[row + 2] = (src[row + 2]>>2)<<2;
+            }
+        }
+        break;
+
+    case 20: // 7 7 6
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+        {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row] = (src[row]>>1)<<1;
+                src[row + 1] = (src[row + 1]>>1)<<1;
+                src[row + 2] = (src[row + 2]>>2)<<2;
+    }
+        }
+        break;
+
+    case 21: // 7 7 7
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+    {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row] = (src[row]>>1)<<1;
+                src[row + 1] = (src[row + 1]>>1)<<1;
+                src[row + 2] = (src[row + 2]>>1)<<1;
+            }
+        }
+        break;
+
+    case 22: // 8 7 7
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+        {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row + 1] = (src[row + 1]>>1)<<1;
+                src[row + 2] = (src[row + 2]>>1)<<1;
+            }
+        }
+        break;
+
+    case 23: // 8 8 7
+        for (y = 0; y < vid.height; y++, src -= vid.rowbytes)
+        {
+            for (x = 0; x < vid.width; x++)
+            {
+                row = x * VID_BYTES;
+                src[row + 2] = (src[row + 2]>>1)<<1;
+    }
+        }
+        break;
+    }
     VID_EndFrame();
 }
 

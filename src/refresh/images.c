@@ -48,6 +48,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     static qerror_t IMG_Save##x(qhandle_t f, const char *filename, \
         byte *pic, int width, int height, int row_stride, int param)
 
+byte        basepal[768];
 /*
 ====================================================================
 
@@ -230,6 +231,7 @@ static int IMG_Unpack8(uint32_t *out, const uint8_t *in, int width, int height)
                 has_alpha = qtrue;
                 // transparent, so scan around for another color
                 // to avoid alpha fringes
+                /* qb: debug  FIXME?
                 if (y > 0 && *(in - width) != 255)
                     p = *(in - width);
                 else if (y < height - 1 && *(in + width) != 255)
@@ -249,6 +251,7 @@ static int IMG_Unpack8(uint32_t *out, const uint8_t *in, int width, int height)
                 else
                     p = 0;
                 // copy rgb components
+                */
                 *out = d_8to24table[p] & U32_RGB;
             } else {
                 *out = d_8to24table[p];
@@ -596,6 +599,7 @@ IMG_LOAD(TGA)
 
     if (pixel_size == 24)
         image->flags |= IF_OPAQUE;
+    else image->flags |= IF_TRANSPARENT;//qb: allow trans
 
     return Q_ERR_SUCCESS;
 }
@@ -1122,6 +1126,7 @@ IMG_LOAD(PNG)
 
     if (has_tRNS == 0 && (colortype & PNG_COLOR_MASK_ALPHA) == 0)
         image->flags |= IF_OPAQUE;
+    else image->flags |= IF_TRANSPARENT; //qb: allow trans
 
     ret = Q_ERR_SUCCESS;
 

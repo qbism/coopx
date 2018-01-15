@@ -402,7 +402,7 @@ static void setup_color(void)
 
 static void setup_celshading(void)
 {
-    float value = Cvar_ClampValue(gl_celshading, 0, 20);
+    float value = Cvar_ClampValue(gl_celshading, 0, 30);
     vec3_t dir;
 
     celscale = 0;
@@ -530,7 +530,7 @@ static void draw_shadow(maliasmesh_t *mesh)
 
     qglEnable(GL_POLYGON_OFFSET_FILL);
     qglPolygonOffset(-1.0f, -2.0f);
-    qglColor4f(0, 0, 0, color[3] * 0.5f);
+    qglColor4f(0, 0, 0, color[3] * 0.25f);
     qglDrawElements(GL_TRIANGLES, mesh->numindices, QGL_INDEX_ENUM,
                     mesh->indices);
     qglDisable(GL_POLYGON_OFFSET_FILL);

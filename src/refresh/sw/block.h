@@ -39,6 +39,7 @@ static void BLOCK_FUNC(void)
                 prowdest[b * TEX_BYTES + 0] = (psource[b * TEX_BYTES + 0] * light[0]) >> 16;
                 prowdest[b * TEX_BYTES + 1] = (psource[b * TEX_BYTES + 1] * light[1]) >> 16;
                 prowdest[b * TEX_BYTES + 2] = (psource[b * TEX_BYTES + 2] * light[2]) >> 16;
+                prowdest[b * TEX_BYTES + 3] = psource[b * TEX_BYTES + 3]; //qbism: add alpha.
                 light[0] += lightstep[0];
                 light[1] += lightstep[1];
                 light[2] += lightstep[2];

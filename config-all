@@ -1,5 +1,19 @@
 ###used by all configs ###
 
+### Game directories ###
+
+# Name of the game directory used as base game directory. Default value is
+# "baseq2". Change this when creating a standalone game using Q2PRO engine.
+CONFIG_GAME_BASE=baseq2
+
+# Name of the game directory used as default game directory. Default value is
+# empty. This option sets the default value of "game" console variable. Change
+# this for building a version of Q2PRO customized for particular game mod, e.g.
+# "action".
+#CONFIG_GAME_DEFAULT=
+
+
+
 ifdef CONFIG_SOFTWARE_RENDERER
     REF ?= SW
 endif
@@ -136,6 +150,7 @@ CFLAGS_c += $(BUILD_DEFS) $(VER_DEFS) $(PATH_DEFS) -DUSE_SERVER=1 -DUSE_CLIENT=1
 RCFLAGS_s += -DREVISION=$(REV) -DVERSION='\"$(VER)\"'
 RCFLAGS_c += -DREVISION=$(REV) -DVERSION='\"$(VER)\"'
 RCFLAGS_g += -DREVISION=$(REV) -DVERSION='\"$(VER)\"'
+
 
 
 ### Object Files ###

@@ -348,6 +348,7 @@ extern oldrefdef_t      r_refdef;
 
 //===================================================================
 
+extern byte     basepal[768];
 extern int      cachewidth;
 extern pixel_t  *cacheblock;
 
@@ -395,6 +396,7 @@ extern cvar_t   *sw_waterwarp;
 extern cvar_t   *sw_drawsird;
 extern cvar_t   *sw_dynamic;
 extern cvar_t   *sw_modulate;
+extern cvar_t   *sw_colorbits;
 
 extern cvar_t   *r_fullbright;
 extern cvar_t   *r_drawentities;

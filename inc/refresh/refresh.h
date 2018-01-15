@@ -22,9 +22,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/cvar.h"
 #include "common/error.h"
 
-#define MAX_DLIGHTS     32
+#define MAX_DLIGHTS     64 	  //qb: was 32
 #define MAX_ENTITIES    256     // == MAX_PACKET_ENTITIES * 2
-#define MAX_PARTICLES   4096
+#define MAX_PARTICLES   8192  //qb: was 4096
 #define MAX_LIGHTSTYLES 256
 
 #define POWERSUIT_SCALE     4.0f

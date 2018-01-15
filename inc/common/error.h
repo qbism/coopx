@@ -58,6 +58,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define Q_ERR_NOT_COHERENT      _Q_ERR(21)  // Coherency check failed
 #endif
 
+//qb: add more specific errors related to map limits
+#define Q_ERR_NUMCLUSTERS       _Q_ERR(22)
+#define Q_ERR_MAXSURFEDGES      _Q_ERR(23)
+#define Q_ERR_PORTALNUM         _Q_ERR(24)
+#define Q_ERR_TOO_MANY_LUMPS    _Q_ERR(25)
+
 // These values directly map to system errno.
 #define Q_ERR_NOENT             Q_ERR(ENOENT)
 #define Q_ERR_NAMETOOLONG       Q_ERR(ENAMETOOLONG)

@@ -117,6 +117,7 @@ void R_BuildGammaTable(void)
         return;
     }
 
+    if (g <0.3) g= 0.3; //qb: need to clamp it.
     for (i = 0; i < 256; i++) {
         inf = 255 * pow((i + 0.5) / 255.5, g) + 0.5;
         gammatable[i] = clamp(inf, 0, 255);
